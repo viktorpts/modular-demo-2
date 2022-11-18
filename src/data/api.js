@@ -1,3 +1,5 @@
+import { clearUserData, getUserData } from '../util.js';
+
 const host = 'http://localhost:3030';
 
 
@@ -6,6 +8,11 @@ async function request(method, url, data) {
         method,
         headers: {}
     };
+
+    const user = getUserData();
+    if (user) {
+        options.headers['X-Authorization'] = user.accessToken;
+    }
 
     if (data !== undefined) {
         options.headers['Content-Type'] = 'application.json';
@@ -22,6 +29,9 @@ async function request(method, url, data) {
         const data = await response.json();
 
         if(response.ok == false) {
+            if (response.status == 403) {
+                clearUserData();
+            }
             throw new Error(data.message);
         }
 
